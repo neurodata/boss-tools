@@ -22,8 +22,8 @@ from heaviside.activities import fanout
 
 log = logger.BossLogger().logger
 
-POLL_DELAY = 5
-STATUS_DELAY = 1
+POLL_DELAY = 15
+STATUS_DELAY = 5
 MAX_NUM_PROCESSES = 50
 RAMPUP_DELAY = 15
 RAMPUP_BACKOFF = 0.8
