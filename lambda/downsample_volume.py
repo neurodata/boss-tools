@@ -330,15 +330,31 @@ def downsample_cube(volume, cube, is_annotation):
 
         for z in range(cube.dim.z):
             # DP NOTE: For isotropic downsample this skips Z slices, instead of trying to merge them
-            slice = volume[z * volume.cubes.z, :, :]
-            image = Image.frombuffer(image_type,
-                                     (volume.shape.x, volume.shape.y),
-                                     slice.flatten(),
-                                     'raw',
-                                     image_type,
-                                     0, 1)
+            # slice = volume[z * volume.cubes.z, :, :]
+            # image = Image.frombuffer(image_type,
+            #                         (volume.shape.x, volume.shape.y),
+            #                         slice.flatten(),
+            #                         'raw',
+            #                         image_type,
+            #                         0, 1)
 
-            cube[z, :, :] = Buffer.asarray(image.resize((cube.shape.x, cube.shape.y), Image.BILINEAR))
+            #cube[z, :, :] = Buffer.asarray(image.resize((cube.shape.x, cube.shape.y), Image.BILINEAR))
+
+            # TODO: Generalize to any integer downsample.
+            if (volume.shape[-2] / cube.shape[-2] != 2.0) or (volume.shape[-1] / cube.shape[-1] != 2.0):
+                raise Exception("Downsampling only supported for a factor of 2.")
+
+            if volume.cubes.z == 1:
+                # Most likely XYZ(2,2,1), indicating anisotropic downsample
+                slice = volume[z * volume.cubes.z, :, :]
+                cube[z, :, :] = Buffer.asarray(slice.reshape((slice.shape[0]//2,2,slice.shape[1]//2,2)).mean((3,1)).astype(dtype=volume.dtype))
+            elif volume.cubes.z == 2:
+                # Most likely XYZ(2,2,2), indicating isotropic downsample
+                slab = volume[z * volume.cubes.z : z * volume.cubes.z + 2, :, :]
+                cube[z, :, :] = Buffer.asarray(slab.reshape((slab.shape[0]//2,2,slab.shape[1]//2,2,slab.shape[2]//2,2)).mean((5,3,1)).astype(dtype=volume.dtype)[0])
+            else:
+                raise Exception("Unexpected number of input cubes '{}'".format(volume.cubes.z))
+
 
 def handler(args, context):
     """Convert JSON arguments into the expected internal types"""
