@@ -96,6 +96,16 @@ def downsample_channel(args):
     # Figure out variables for isotropic, anisotropic, or isotropic and anisotropic
     # downsampling. If both are happening, fanout one and then the other in series.
     configs = []
+
+    # if this iteration will split into aniso and iso downsampling, copy the coordinate frame
+    if args['type'] != 'isotropic' and resolution == args['iso_resolution']:
+        def copy(var):
+            args['iso_{}_start'.format(var)] = args['{}_start'.format(var)]
+            args['iso_{}_stop'.format(var)] = args['{}_stop'.format(var)]
+        copy('x')
+        copy('y')
+        copy('z')
+
     if args['type'] == 'isotropic':
         configs.append({
             'name': 'isotropic',
@@ -161,15 +171,6 @@ def downsample_channel(args):
         resize('x', step.x)
         resize('y', step.y)
         resize('z', step.z)
-
-    # if next iteration will split into aniso and iso downsampling, copy the coordinate frame
-    if args['type'] != 'isotropic' and (resolution + 1) == args['iso_resolution']:
-        def copy(var):
-            args['iso_{}_start'.format(var)] = args['{}_start'.format(var)]
-            args['iso_{}_stop'.format(var)] = args['{}_stop'.format(var)]
-        copy('x')
-        copy('y')
-        copy('z')
 
     # Advance the loop and recalculate the conditional
     # Using max - 1 because resolution_max should not be a valid resolution
