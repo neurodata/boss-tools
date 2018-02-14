@@ -24,8 +24,8 @@ import argparse
 import json
 
 
-MIGRATION_BUCKET_DEV = "migrations-dev-boss"
-MIGRATION_BUCKET_PROD = "migrations-prod-boss"
+MIGRATION_BUCKET_DEV = "bossdev-migrations-dev-boss"
+MIGRATION_BUCKET_PROD = "bossdev-migrations-prod-boss"
 
 bucketLookup = {"endpoint.integration.boss": MIGRATION_BUCKET_PROD,
                 "endpoint.production.boss": MIGRATION_BUCKET_PROD,
