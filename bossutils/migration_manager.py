@@ -24,11 +24,11 @@ import argparse
 import json
 
 
-MIGRATION_BUCKET_DEV = "bossdev-migrations-dev-boss"
-MIGRATION_BUCKET_PROD = "bossdev-migrations-prod-boss"
+MIGRATION_BUCKET_DEV = "migrations-dev-neurodata"
+MIGRATION_BUCKET_PROD = "migrations-prod-neurodata"
 
-bucketLookup = {"endpoint.integration.boss": MIGRATION_BUCKET_PROD,
-                "endpoint.production.boss": MIGRATION_BUCKET_PROD,
+bucketLookup = {"endpoint.integration.neurodata": MIGRATION_BUCKET_PROD,
+                "endpoint.production.neurodata": MIGRATION_BUCKET_PROD,
                 "default": MIGRATION_BUCKET_DEV}
 
 COMMANDS=["get", "put"]
