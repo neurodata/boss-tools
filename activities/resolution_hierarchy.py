@@ -18,27 +18,27 @@ from spdb.c_lib.ndtype import CUBOIDSIZE
 from bossutils.multidimensional import XYZ, ceildiv
 from bossutils.multidimensional import range as xyz_range
 
-from heaviside.activities import fanout
+from heaviside.activities import fanout_sqs
 
 log = logger.BossLogger().logger
 
 # Fanout variables, see heaviside.activities.fanout for full details
 # int - seconds: The delay between launch subprocesses and polling for status
-POLL_DELAY = 5
+POLL_DELAY = 1
 
 # int - seconds: The inner delay between status queries
 #                Helps limit API speed, so as to not run into throttling issues
-STATUS_DELAY = 1
+STATUS_DELAY = 0.5
 
 # int: Maximum number of concurrent subprocess executions to have running
-MAX_NUM_PROCESSES = 50
+MAX_NUM_PROCESSES = 1000
 
 # int - seconds: The initial rampup delay to allow AWS resources to scale
-RAMPUP_DELAY = 15
+RAMPUP_DELAY = 10
 
 # float: The backoff value to multiple RAMPUP_DELAY by for each subprocess launch
 #        When RAMPUP_DELAY is zero there is no longer a delay between launched
-RAMPUP_BACKOFF = 0.8
+RAMPUP_BACKOFF = 0.75
 
 def downsample_channel(args):
     """
@@ -152,7 +152,7 @@ def downsample_channel(args):
         log.debug("Indexing Annotations: {}".format(index_annotations))
 
         # Call the downsample_volume lambda to process the data
-        fanout(aws.get_session(),
+        fanout_sqs(aws.get_session(),
                args['downsample_volume_sfn'],
                make_args(args, cubes_start, cubes_stop, step, dim, use_iso_flag, index_annotations),
                max_concurrent = MAX_NUM_PROCESSES,

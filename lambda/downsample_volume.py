@@ -367,6 +367,14 @@ def handler(args, context):
 
     downsample_volume(args['args'], args['target'], args['step'], args['dim'], args['use_iso_flag'], args['index_annotations'])
 
+    if 'sqs' in args and 'jobid' in args:
+        # Get the service resource
+        sqs = boto3.resource('sqs')
+        queue = sqs.get_queue_by_name(QueueName=args['sqs'])
+        response = queue.send_message(MessageBody=str(args['jobid']))
+        if response.get('Failed'):
+            print('SQS message failed')
+
 ## Entry point for multiLambda ##
 log.debug("sys.argv[1]: " + sys.argv[1])
 args = json.loads(sys.argv[1])
