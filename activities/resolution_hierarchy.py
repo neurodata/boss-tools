@@ -34,11 +34,13 @@ STATUS_DELAY = 0.5
 MAX_NUM_PROCESSES = 1000
 
 # int - seconds: The initial rampup delay to allow AWS resources to scale
-RAMPUP_DELAY = 10
+RAMPUP_DELAY = 5
 
 # float: The backoff value to multiple RAMPUP_DELAY by for each subprocess launch
 #        When RAMPUP_DELAY is zero there is no longer a delay between launched
-RAMPUP_BACKOFF = 0.75
+TASK_RAMPUP_BACKOFF = 0.75
+
+STEP_RAMPUP_BACKOFF = 0.25
 
 def downsample_channel(args):
     """
@@ -132,7 +134,9 @@ def downsample_channel(args):
                 'frame_stop_key': 'iso_{}_stop',
             })
 
+    rampup_delay = float(RAMPUP_DELAY)
     for config in configs:
+
         frame_start = frame(config['frame_start_key'])
         frame_stop = frame(config['frame_stop_key'])
         step = config['step']
@@ -156,8 +160,8 @@ def downsample_channel(args):
                args['downsample_volume_sfn'],
                make_args(args, cubes_start, cubes_stop, step, dim, use_iso_flag, index_annotations),
                max_concurrent = MAX_NUM_PROCESSES,
-               rampup_delay = RAMPUP_DELAY,
-               rampup_backoff = RAMPUP_BACKOFF,
+               rampup_delay = rampup_delay,
+               rampup_backoff = TASK_RAMPUP_BACKOFF,
                poll_delay = POLL_DELAY,
                status_delay = STATUS_DELAY)
 
@@ -171,6 +175,8 @@ def downsample_channel(args):
         resize('x', step.x)
         resize('y', step.y)
         resize('z', step.z)
+
+        rampup_delay = rampup_delay * STEP_RAMPUP_BACKOFF
 
     # Advance the loop and recalculate the conditional
     # Using max - 1 because resolution_max should not be a valid resolution
